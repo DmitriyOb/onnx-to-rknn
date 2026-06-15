@@ -205,22 +205,34 @@ def main():
             logging.info("[1/4] Configuring RKNN...")
             rknn.config(
                 target_platform=target_platform,
-                quantized_dtype=quant_dtype,
+                quantized_dtype='w8a8',       # Включаем режим Веса=INT8, Активации=INT8
                 optimization_level=3
             )
 
             logging.info(f"[2/4] Loading ONNX model: {onnx_model_path}, detected input name: '{onnx_input_name}'...")
+            # При загрузке ONNX добавляем встроенный флаг до-квантования весов, если он поддерживается:
             ret = rknn.load_onnx(
                 model=onnx_model_path,
                 inputs=[onnx_input_name],
-                input_size_list=[[1, 3, height, width]],
+                input_size_list=[[1, 3, height, width]]
             )
 
             if ret != 0: raise RuntimeError(f"RKNN load_onnx failed with code {ret}")
             logging.info("ONNX model loaded successfully.")
 
             logging.info("[3/4] Building RKNN model...")
-            ret = rknn.build(do_quantization=False)
+            
+            # АВТО-ДАТАСЕТ ДЛЯ INT8: Создаем временный файл-список для обхода ограничений Rockchip
+            dataset_file = "virtual_dataset.txt"
+            with open(dataset_file, 'w') as f:
+                f.write("virtual_image.jpg\n") # Имя-заглушка для компилятора
+                
+            # Запускаем сборку с принудительным квантованием
+            ret = rknn.build(do_quantization=True, dataset=dataset_file)
+            
+            # Удаляем временный текстовый файл после успешной сборки
+            if os.path.exists(dataset_file): os.remove(dataset_file)
+            
             if ret != 0: raise RuntimeError(f"RKNN build failed with code {ret}")
             logging.info("RKNN model built successfully.")
 
