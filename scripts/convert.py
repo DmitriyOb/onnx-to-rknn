@@ -202,22 +202,21 @@ def main():
             logging.info(f"--- Converting shape: {shape_str} ---")
             rknn = RKNN(verbose=args.verbose)
 
-          logging.info("[1/4] Configuring RKNN...")
+            logging.info("[1/4] Configuring RKNN...")
             rknn.config(
                 target_platform=target_platform,
                 quantized_dtype=quant_dtype,
-                optimization_level=3,          # Поднимаем уровень оптимизации до максимума
-                rknn_batch_size=1,             # Оптимизируем под поточное видео 1 кадр за раз
-                unlimited_core_mask=True       # Снимаем ограничения с ИИ-ядер RK3566
+                optimization_level=3,
+                rknn_batch_size=1,
+                unlimited_core_mask=True
             )
-            # Config doesn't return a useful value to check
 
             logging.info(f"[2/4] Loading ONNX model: {onnx_model_path}, detected input name: '{onnx_input_name}'...")
             ret = rknn.load_onnx(
                 model=onnx_model_path,
                 inputs=[onnx_input_name],
                 input_size_list=[[1, 3, height, width]],
-                model_type='yolov8'  # <--- ЭТА СТРОКА ВКЛЮЧАЕТ АППАРАТНЫЙ ДЕКОДЕР ROCKCHIP!
+                model_type='yolov8'
             )
 
             if ret != 0: raise RuntimeError(f"RKNN load_onnx failed with code {ret}")
