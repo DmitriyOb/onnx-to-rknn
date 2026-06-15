@@ -222,16 +222,22 @@ def main():
 
             logging.info("[3/4] Building RKNN model...")
             
-            # АВТО-ДАТАСЕТ ДЛЯ INT8: Создаем временный файл-список для обхода ограничений Rockchip
+            # АВТО-КАЛИБРОВКА: Создаем реальную физическую картинку-пустышку (640x640, серый цвет)
+            import cv2
+            dummy_img = np.full((height, width, 3), 128, dtype=np.uint8)
+            cv2.imwrite("virtual_image.jpg", dummy_img)
+            
+            # Создаем текстовый файл-указатель для компилятора Rockchip
             dataset_file = "virtual_dataset.txt"
             with open(dataset_file, 'w') as f:
-                f.write("virtual_image.jpg\n") # Имя-заглушка для компилятора
+                f.write("virtual_image.jpg\n")
                 
-            # Запускаем сборку с принудительным квантованием
+            # Запускаем сборку с честным квантованием в INT8 (w8a8)
             ret = rknn.build(do_quantization=True, dataset=dataset_file)
             
-            # Удаляем временный текстовый файл после успешной сборки
+            # Убираем за собой временный мусор
             if os.path.exists(dataset_file): os.remove(dataset_file)
+            if os.path.exists("virtual_image.jpg"): os.remove("virtual_image.jpg")
             
             if ret != 0: raise RuntimeError(f"RKNN build failed with code {ret}")
             logging.info("RKNN model built successfully.")
