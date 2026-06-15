@@ -214,7 +214,6 @@ def main():
                 model=onnx_model_path,
                 inputs=[onnx_input_name],
                 input_size_list=[[1, 3, height, width]],
-                model_type='yolov8'
             )
 
             if ret != 0: raise RuntimeError(f"RKNN load_onnx failed with code {ret}")
