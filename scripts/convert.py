@@ -206,9 +206,7 @@ def main():
             rknn.config(
                 target_platform=target_platform,
                 quantized_dtype=quant_dtype,
-                optimization_level=3,
-                rknn_batch_size=1,
-                unlimited_core_mask=True
+                optimization_level=3
             )
 
             logging.info(f"[2/4] Loading ONNX model: {onnx_model_path}, detected input name: '{onnx_input_name}'...")
