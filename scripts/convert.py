@@ -224,6 +224,7 @@ def main():
             
             # АВТО-КАЛИБРОВКА: Создаем реальную физическую картинку-пустышку (640x640, серый цвет)
             import cv2
+            import numpy as np
             dummy_img = np.full((height, width, 3), 128, dtype=np.uint8)
             cv2.imwrite("virtual_image.jpg", dummy_img)
             
